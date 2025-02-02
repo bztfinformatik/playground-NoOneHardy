@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: alvaniev/mnts-backend
+    container_name: mnts-backend
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_DBDIALECT=mysql
+      - NODE_DBHOST=host.docker.internal
+      - NODE_DBPORT=3308
+      - NODE_DBUSER=root
+      - NODE_DBPWD=root
+      - NODE_DBSCHEMA=mnts
+      - NODE_DBSYNC=true
+      - NODE_HOST=http://localhost:3000
