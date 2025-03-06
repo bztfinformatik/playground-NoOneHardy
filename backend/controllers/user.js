@@ -10,6 +10,9 @@ const {
   SEQ_UNIQUE_CONSTRAINT_ERR,
 } = require("../util/const");
 
+// import validator to validate user input
+const validator = require('validator');
+
 const { isEmpty } = require("../util/helper");
 const User = require("../models/user");
 const logger = require("../util/log");
@@ -70,12 +73,39 @@ exports.login = async (req, res, next) => {
 
 exports.signup = async (req, res, next) => {
   try {
+    const data = req.body
+    
+    // Validating input
+    if (!validator.isEmail(data.username + '')) {
+      const err = new Error("Username must be an email.");
+      err.statusCode = 422;
+      next(err);
+    }
+
+    if (validator.isEmpty(data.pwd + '') || !validator.isLength(data.pwd + '', {min: 8})) {
+      const err = new Error("Password must be at least 8 characters long.");
+      err.statusCode = 422;
+      next(err);
+    }
+
+    if (!data.lastname || !validator.matches(data.lastname + '', /^[A-Za-z \']+$/)) {
+      const err = new Error("Lastname can only contain letters, spaces and single quotes.");
+      err.statusCode = 422;
+      next(err);
+    }
+
+    if (!data.firstname || !validator.matches(data.firstname + '', /^[A-Za-z \']+$/)) {
+      const err = new Error("Firstname can only contain letters, spaces and single quotes.");
+      err.statusCode = 422;
+      next(err);
+    }
+
     const user = await User.create({
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      username: req.body.username,
-      pwd: req.body.pwd,
-      avatar: req.body.avatar,
+      firstname: data.firstname,
+      lastname: data.lastname,
+      username: data.username,
+      pwd: data.pwd,
+      avatar: data.avatar,
     });
     res.status(HTTP_STATUS_CREATED).json(user);
   } catch (err) {
