@@ -79,25 +79,25 @@ exports.signup = async (req, res, next) => {
     if (!validator.isEmail(data.username + '')) {
       const err = new Error("Username must be an email.");
       err.statusCode = 422;
-      throw err;
+      next(err);
     }
 
     if (validator.isEmpty(data.pwd + '') || !validator.isLength(data.pwd + '', {min: 8})) {
       const err = new Error("Password must be at least 8 characters long.");
       err.statusCode = 422;
-      throw err;
+      next(err);
     }
 
     if (!data.lastname || !validator.matches(data.lastname + '', /^[A-Za-z \']+$/)) {
       const err = new Error("Lastname can only contain letters, spaces and single quotes.");
       err.statusCode = 422;
-      throw err;
+      next(err);
     }
 
     if (!data.firstname || !validator.matches(data.firstname + '', /^[A-Za-z \']+$/)) {
       const err = new Error("Firstname can only contain letters, spaces and single quotes.");
       err.statusCode = 422;
-      throw err;
+      next(err);
     }
 
     const user = await User.create({
