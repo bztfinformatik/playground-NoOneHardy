@@ -20,6 +20,8 @@ const logger = require("../util/log");
 const { SequelizeUniqueConstraintError } = require("sequelize");
 const { loggers } = require("winston");
 const { restart } = require("nodemon");
+const bcript = require('bcrypt');
+const saltRounds = 10;
 
 function toUserObj(resultSet) {
   let user = {};
@@ -56,7 +58,7 @@ exports.login = async (req, res, next) => {
       where: { username: username },
     });
 
-    if (!isEmpty(user) && pwd === user.pwd) {
+    if (!isEmpty(user) && await bcript.compare(pwd, user.pwd)) {
       res.status(HTTP_STATUS_OK).json(user);
     } else {
       const err = new Error("Authentication failed.");
@@ -74,7 +76,7 @@ exports.login = async (req, res, next) => {
 exports.signup = async (req, res, next) => {
   try {
     const data = req.body
-    
+
     // Validating input
     if (!validator.isEmail(data.username + '')) {
       const err = new Error("Username must be an email.");
@@ -82,7 +84,7 @@ exports.signup = async (req, res, next) => {
       next(err);
     }
 
-    if (validator.isEmpty(data.pwd + '') || !validator.isLength(data.pwd + '', {min: 8})) {
+    if (validator.isEmpty(data.pwd + '') || !validator.isLength(data.pwd + '', { min: 8 })) {
       const err = new Error("Password must be at least 8 characters long.");
       err.statusCode = 422;
       next(err);
@@ -99,12 +101,12 @@ exports.signup = async (req, res, next) => {
       err.statusCode = 422;
       next(err);
     }
-
+    const hash = await bcript.hash(data.pwd, saltRounds)
     const user = await User.create({
       firstname: data.firstname,
       lastname: data.lastname,
       username: data.username,
-      pwd: data.pwd,
+      pwd: hash,
       avatar: data.avatar,
     });
     res.status(HTTP_STATUS_CREATED).json(user);
