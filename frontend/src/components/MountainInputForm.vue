@@ -11,6 +11,13 @@
           clearable
         ></v-text-field>
         <v-text-field
+          v-model="mntDescription.value.value"
+          label="Beschreibung"
+          :error-messages="errors.mntDescription"
+          dense
+          clearable
+        ></v-text-field>
+        <v-text-field
           v-model="mntLatitude.value.value"
           label="Breitengrad"
           :error-messages="errors.mntLatitude"
@@ -68,6 +75,7 @@ export default {
     const { handleSubmit, errors } = useForm({
       validationSchema: yup.object({
         mntName: yup.string().required("Pflichtfeld"),
+        mntDescription: yup.string().required("Pflichtfeld"),
         mntLatitude: yup
           .number()
           .min(-90.0, "Breitengrad >= -90.0°")
@@ -92,6 +100,7 @@ export default {
     const mntLatitude = useField("mntLatitude");
     const mntLongitude = useField("mntLongitude");
     const mntElevation = useField("mntElevation");
+    const mntDescription = useField("mntDescription");
     const file = ref([]);
 
     const onSubmit = handleSubmit((values) => {
@@ -109,6 +118,7 @@ export default {
         let reqBody = JSON.stringify({
           name: mntName.value.value,
           elevation: mntElevation.value.value,
+          description: mntDescription.value.value,
           latitude: mntLatitude.value.value,
           longitude: mntLongitude.value.value,
           hasmountainrailway: false,
@@ -183,6 +193,7 @@ export default {
       mntLatitude,
       mntLongitude,
       mntElevation,
+      mntDescription,
       file,
       errors,
       onSubmit,

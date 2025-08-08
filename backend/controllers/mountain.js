@@ -124,12 +124,45 @@ exports.getUserMountain = async (req, res, next) => {
 
 exports.addPublicMountain = async (req, res, next) => {
   try {
+    const data = req.body
+    
+    // Validating input
+    if (!validator.matches(data.name + '', /^[A-Za-z0-9 \']+$/)) {
+      const err = new Error("Name can only contain letters, numbers, spaces and single quotes.");
+      err.statusCode = 422;
+      next(err);
+    }
+
+    if (!validator.isInt(data.elevation + '')) {
+      const err = new Error("Elevation must be of type integer.");
+      err.statusCode = 422;
+      next(err);
+    }
+
+    if (!validator.isFloat(data.longitude, {min: -180.0, max: 180.0})) {
+      const err = new Error("Longitude must be a float between -180.0 and 180.0.");
+      err.statusCode = 422;
+      next(err);
+    }
+
+    if (!validator.isFloat(data.latitude, {min: -90.0, max: 90.0})) {
+      const err = new Error("Latitude must be a float between -90.0 and 90.0.");
+      err.statusCode = 422;
+      next(err);
+    }
+
+    if (!validator.isBoolean(data.hasmountainrailway + '')) {
+      const err = new Error("Hasmountainrailway must be of type boolean.");
+      err.statusCode = 422;
+      next(err);
+    }
+
     const resultSet = await Mountain.create({
-      name: req.body.name,
-      elevation: req.body.elevation,
-      longitude: req.body.longitude,
-      latitude: req.body.latitude,
-      hasmountainrailway: req.body.hasmountainrailway,
+      name: data.name,
+      elevation: data.elevation,
+      longitude: data.longitude,
+      latitude: data.latitude,
+      hasmountainrailway: data.hasmountainrailway,
     });
     res.status(HTTP_STATUS_CREATED).json(toGeoFeatureObj(resultSet));
   } catch (err) {
