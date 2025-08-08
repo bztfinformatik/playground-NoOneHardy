@@ -9,6 +9,8 @@ const mountainCtrl = require("../controllers/mountain");
 const userCtrl = require("../controllers/user");
 const miscCtrl = require("../controllers/misc");
 
+// import middleware
+const isAuth = require("../middleware/isauthenticated")
 
 // define storage location and filename for uploaded image files
 const imgStorage = multer.diskStorage({
@@ -41,8 +43,8 @@ const upload = multer({ storage: imgStorage, fileFilter: filter }).single(
 const router = express.Router();
 
 
-router.get("/users/:userid/mnts", mountainCtrl.getAllUserMountainIds);
-router.get("/users/:userid/mnts/:mntid", mountainCtrl.getUserMountain);
+router.get("/users/:userid/mnts", isAuth, mountainCtrl.getAllUserMountainIds);
+router.get("/users/:userid/mnts/:mntid", isAuth, mountainCtrl.getUserMountain);
 router.post("/users/:userid/mnts", mountainCtrl.addUserMountain);
 router.put("/users/:userid/mnts/:mntid/img", upload, mountainCtrl.addUserMountainImage);
 router.put("/users/:userid/mnts/:mntid", mountainCtrl.updateUserMountain);

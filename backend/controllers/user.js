@@ -21,6 +21,8 @@ const { SequelizeUniqueConstraintError } = require("sequelize");
 const { loggers } = require("winston");
 const { restart } = require("nodemon");
 const bcript = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 const saltRounds = 10;
 
 function toUserObj(resultSet) {
@@ -49,7 +51,12 @@ getUserByUsername = async (username) => {
   }
 };
 
-exports.login = async (req, res, next) => {
+
+exports.login = async (
+  req, 
+  /** @type express.Response*/
+  res, 
+  next) => {
   const username = req.body.username;
   const pwd = req.body.pwd;
 
@@ -59,7 +66,8 @@ exports.login = async (req, res, next) => {
     });
 
     if (!isEmpty(user) && await bcript.compare(pwd, user.pwd)) {
-      res.status(HTTP_STATUS_OK).json(user);
+      const token = jwt.sign({}, process.env.NODE_JWT_SECRET, {subject: username, expiresIn: 3600000})
+      res.status(HTTP_STATUS_OK).json({...user.dataValues, jwt: token});
     } else {
       const err = new Error("Authentication failed.");
       err.statusCode = HTTP_STATUS_UNAUTHORIZED;
@@ -81,25 +89,25 @@ exports.signup = async (req, res, next) => {
     if (!validator.isEmail(data.username + '')) {
       const err = new Error("Username must be an email.");
       err.statusCode = 422;
-      next(err);
+      throw err;
     }
 
     if (validator.isEmpty(data.pwd + '') || !validator.isLength(data.pwd + '', { min: 8 })) {
       const err = new Error("Password must be at least 8 characters long.");
       err.statusCode = 422;
-      next(err);
+      throw err;
     }
 
     if (!data.lastname || !validator.matches(data.lastname + '', /^[A-Za-z \']+$/)) {
       const err = new Error("Lastname can only contain letters, spaces and single quotes.");
       err.statusCode = 422;
-      next(err);
+      throw err;
     }
 
     if (!data.firstname || !validator.matches(data.firstname + '', /^[A-Za-z \']+$/)) {
       const err = new Error("Firstname can only contain letters, spaces and single quotes.");
       err.statusCode = 422;
-      next(err);
+      throw err;
     }
     const hash = await bcript.hash(data.pwd, saltRounds)
     const user = await User.create({

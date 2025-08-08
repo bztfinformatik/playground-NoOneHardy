@@ -4,6 +4,7 @@
     <v-card-title>
       {{ mnt.name }}
     </v-card-title>
+    <v-card-text v-html="mnt.description"/>
     <div class="d-flex">
       <v-card-text>Höhe: {{ mnt.el }}m</v-card-text>
     </div>
@@ -22,6 +23,7 @@ export default {
       id: "",
       name: "",
       img: "",
+      description: "",
       el: 0,
       hasMountainRailway: false,
     });
@@ -31,6 +33,7 @@ export default {
       mnt.name = loadedMnt.properties.name;
       mnt.el = loadedMnt.properties.el;
       mnt.img = loadedMnt.properties.img;
+      mnt.description = loadedMnt.properties.description
     })();
 
 
